@@ -48,7 +48,7 @@ public:
         std::uniform_int_distribution<uint16_t> dist(m_portRange.first, m_portRange.second);
         return dist(mt);
     }
-    bool Start(uint16_t remotePort = 0,const std::string& remoteAddr = "0.0.0.0"){
+    bool Start(uint16_t remotePort = 0,const std::string& remoteAddr = ""){
         if(!m_sock){
             return false;
         }
