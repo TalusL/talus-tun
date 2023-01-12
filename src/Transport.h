@@ -52,17 +52,13 @@ public:
         if(!m_sock){
             return false;
         }
-        if(remotePort&&!remoteAddr.empty()){
-            m_remoteAddr = remoteAddr;
-            m_remotePort = remotePort;
-        }
         if(TCP_ACTIVE == m_transportType){
             m_sock->setOnRead([this](const Buffer::Ptr &buf, struct sockaddr *addr, int addr_len){
                 if(m_onRead){
                     m_onRead(buf,addr,addr_len);
                 }
             });
-            m_sock->connect(m_remoteAddr,m_remotePort,[](const SockException &err){
+            m_sock->connect(remoteAddr,remotePort,[](const SockException &err){
                 //TODO error
             },5,m_localAddr,m_localPort);
         }
@@ -87,12 +83,14 @@ public:
         if(UDP == m_transportType){
             if(remotePort&&!remoteAddr.empty()){
                 struct sockaddr_storage addrDst{};
-                makeAddr(&addrDst,m_remoteAddr.c_str(),m_remotePort);
+                makeAddr(&addrDst,remoteAddr.c_str(),remotePort);
                 m_sock->bindPeerAddr(reinterpret_cast<const sockaddr *>(&addrDst),sizeof(sockaddr));
+                m_bindUdp = true;
             }
             m_sock->setOnRead([this](const Buffer::Ptr &buf, struct sockaddr *addr, int addr_len){
-                if(!m_remotePort&&m_remoteAddr.empty()){
+                if(!m_bindUdp){
                     m_sock->bindPeerAddr(addr,sizeof(sockaddr));
+                    m_bindUdp = true;
                 }
                 if(m_onRead){
                     m_onRead(buf,addr,addr_len);
@@ -132,10 +130,9 @@ private:
     TransportType m_transportType;
     const std::pair<uint16_t,uint16_t> m_portRange = {30000,40000};
     uint16_t m_localPort = 0;
-    uint16_t m_remotePort = 0;
-    std::string m_remoteAddr;
     std::string m_localAddr;
     toolkit::Socket::onReadCB m_onRead;
+    volatile bool m_bindUdp = false;
 };
 
 
