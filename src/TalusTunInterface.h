@@ -12,15 +12,16 @@ public:
     class TalusTunCfg{
     public:
         TalusTunCfg(std::string ipv4Addr, std::string ipv4NetMark,
-                    std::string ipv4Broadcast, uint mtu)
+                    std::string ipv4Broadcast, uint mtu,std::string mac)
                     : ipv4Addr(std::move(ipv4Addr)),
                     ipv4NetMark(std::move(ipv4NetMark)),
                     ipv4Broadcast(std::move(ipv4Broadcast)),
-                    mtu(mtu) {}
+                    mtu(mtu),mac(std::move(mac)){}
 
         std::string ipv4Addr;
         std::string ipv4NetMark;
         std::string ipv4Broadcast;
+        std::string mac;
         uint mtu = 1400;
     };
     explicit TalusTunInterface(class TalusTunCfg& cfg);
@@ -29,9 +30,9 @@ public:
     bool Listen(const viface::dispatcher_cb& cb);
     //Stop
     void Stop();
+    //
+    static std::string GeneraMac();
 private:
-    //interface mac
-    std::string m_mac;
     //select loop thread
     std::thread m_listenThread;
     //running flag

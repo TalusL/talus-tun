@@ -12,13 +12,7 @@ TalusTunInterface::TalusTunInterface(TalusTunCfg &cfg):viface::VIface("Talus%d")
     setIPv4Broadcast(cfg.ipv4Broadcast);
     setIPv4Netmask(cfg.ipv4NetMark);
     setMTU(cfg.mtu);
-
-    //make random mac
-    auto r = toolkit::trim(toolkit::hexmem(toolkit::makeRandStr(4, false).c_str(),4));
-    toolkit::replace(r," ",":");
-    m_mac = std::string("00:50:")+r;
-
-    setMAC(m_mac);
+    setMAC(cfg.mac);
 }
 
 bool TalusTunInterface::Listen(const viface::dispatcher_cb &cb) {
@@ -43,4 +37,11 @@ void TalusTunInterface::Stop() {
     if(m_listenThread.joinable()){
         m_listenThread.join();
     }
+}
+
+std::string TalusTunInterface::GeneraMac() {
+    //make random mac
+    auto r = toolkit::trim(toolkit::hexmem(toolkit::makeRandStr(5, false).c_str(),5));
+    toolkit::replace(r," ",":");
+    return std::string("00:")+r;
 }

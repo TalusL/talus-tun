@@ -6,7 +6,7 @@
 using namespace std;
 int main(){
 
-    TalusTunInterface::TalusTunCfg cfg("192.168.111.2","255.255.255.0","192.168.111.255",1400);
+    TalusTunInterface::TalusTunCfg cfg("192.168.111.2","255.255.255.0","192.168.111.255",1400,TalusTunInterface::GeneraMac());
     TalusTunInterface interface(cfg);
     interface.up();
 
