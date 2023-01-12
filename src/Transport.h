@@ -61,6 +61,7 @@ public:
         }
         if(TCP_PASSIVE == m_transportType) {
             m_sock->setOnAccept([this](Socket::Ptr &sock, std::shared_ptr<void> &complete) {
+                if(!m_ClientSock){
                     m_ClientSock = sock;
                     m_ClientSock->setOnRead([this,sock](const Buffer::Ptr &buf, struct sockaddr *addr, int addr_len){
                         m_ClientSock->send(buf);
@@ -71,6 +72,9 @@ public:
                     m_ClientSock->setOnErr([](const SockException &err){
                         //TODO error
                     });
+                }else{
+                    sock->closeSock();
+                }
             });
         }
         if(TCP_ACTIVE == m_transportType || UDP == m_transportType){
