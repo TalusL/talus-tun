@@ -1,0 +1,6 @@
+[submodule "3rd/ZLToolKit"]
+	path = 3rd/ZLToolKit
+	url = https://github.com/ZLMediaKit/ZLToolKit.git
+[submodule "3rd/libviface"]
+	path = 3rd/libviface
+	url = https://github.com/HPENetworking/libviface.git
