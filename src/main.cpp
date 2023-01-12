@@ -11,6 +11,7 @@ int main(){
     auto b = transport.Init();
     auto port = transport.GetLocalPort();
     transport.Start(2223,"10.8.9.97");
+//    transport.Start();
     cout<<"port:"<<port<<"\n";
 
     TalusTunInterface::TalusTunCfg cfg("192.168.111.2","255.255.255.0","192.168.111.255",1400,TalusTunInterface::GeneraMac());
