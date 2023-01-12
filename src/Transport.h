@@ -57,6 +57,11 @@ public:
             m_remotePort = remotePort;
         }
         if(TCP_ACTIVE == m_transportType){
+            m_sock->setOnRead([this](const Buffer::Ptr &buf, struct sockaddr *addr, int addr_len){
+                if(m_onRead){
+                    m_onRead(buf,addr,addr_len);
+                }
+            });
             m_sock->connect(m_remoteAddr,m_remotePort,[](const SockException &err){
                 //TODO error
             },5,m_localAddr,m_localPort);
@@ -79,8 +84,16 @@ public:
                 }
             });
         }
-        if(TCP_ACTIVE == m_transportType || UDP == m_transportType){
+        if(UDP == m_transportType){
+            if(remotePort&&!remoteAddr.empty()){
+                struct sockaddr_storage addrDst{};
+                makeAddr(&addrDst,m_remoteAddr.c_str(),m_remotePort);
+                m_sock->bindPeerAddr(reinterpret_cast<const sockaddr *>(&addrDst),sizeof(sockaddr));
+            }
             m_sock->setOnRead([this](const Buffer::Ptr &buf, struct sockaddr *addr, int addr_len){
+                if(!m_remotePort&&m_remoteAddr.empty()){
+                    m_sock->bindPeerAddr(addr,sizeof(sockaddr));
+                }
                 if(m_onRead){
                     m_onRead(buf,addr,addr_len);
                 }
@@ -103,18 +116,12 @@ public:
         if(!m_sock){
             return false;
         }
-        if(m_transportType == UDP){
-            struct sockaddr_storage addrDst{};
-            makeAddr(&addrDst,m_remoteAddr.c_str(),m_remotePort);
-            m_sock->send((char*)data,len,(sockaddr*)&addrDst, sizeof(sockaddr_storage));
-        }
-        if(m_transportType == TCP_ACTIVE){
-            m_sock->send((char*)data,len);
-        }
         if(m_transportType == TCP_PASSIVE){
             if(m_ClientSock){
                 m_ClientSock->send((char*)data,len);
             }
+        }else{
+            m_sock->send((char*)data,len);
         }
         return true;
     }

@@ -7,7 +7,7 @@
 using namespace std;
 int main(){
 
-    Transport transport(Transport::TransportType::TCP_PASSIVE);
+    Transport transport(Transport::TransportType::TCP_ACTIVE);
     auto b = transport.Init();
     auto port = transport.GetLocalPort();
     transport.Start(2223,"10.8.9.97");
