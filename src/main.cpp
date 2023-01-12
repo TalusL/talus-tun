@@ -17,7 +17,7 @@ int main(){
     TalusTunInterface interface(cfg);
     interface.up();
 
-    interface.Listen([transport](string const& name, uint id, vector<uint8_t>& packet){
+    interface.Listen([&transport](string const& name, uint id, vector<uint8_t>& packet){
         static uint count = 0;
 
         cout << "+++ Received packet " << dec << count;
