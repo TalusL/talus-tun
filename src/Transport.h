@@ -52,9 +52,11 @@ public:
         if(!m_sock){
             return false;
         }
-        if(TCP_ACTIVE == m_transportType){
+        if(remotePort&&!remoteAddr.empty()){
             m_remoteAddr = remoteAddr;
             m_remotePort = remotePort;
+        }
+        if(TCP_ACTIVE == m_transportType){
             m_sock->connect(m_remoteAddr,m_remotePort,[](const SockException &err){
                 //TODO error
             },5,m_localAddr,m_localPort);
