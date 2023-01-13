@@ -6,6 +6,7 @@
 #define TALUSTUN_TRANSPORT_H
 
 #include <random>
+#include <iostream>
 #include "Network/Socket.h"
 
 using namespace toolkit;
@@ -82,14 +83,12 @@ public:
         }
         if(UDP == m_transportType){
             if(remotePort&&!remoteAddr.empty()){
-                struct sockaddr_storage addrDst{};
-                makeAddr(&addrDst,remoteAddr.c_str(),remotePort);
-                m_sock->bindPeerAddr(reinterpret_cast<const sockaddr *>(&addrDst),sizeof(sockaddr));
+                makeAddr(&m_udpRemote, remoteAddr.c_str(), remotePort);
                 m_bindUdp = true;
             }
             m_sock->setOnRead([this](const Buffer::Ptr &buf, struct sockaddr *addr, int addr_len){
                 if(!m_bindUdp){
-                    m_sock->bindPeerAddr(addr,sizeof(sockaddr));
+                    m_udpRemote = *(sockaddr_storage*)addr;
                     m_bindUdp = true;
                 }
                 if(m_onRead){
@@ -99,7 +98,7 @@ public:
         }
 
         m_sock->setOnErr([](const SockException &err){
-            //TODO error
+            std::cout<<err.what();
         });
         return true;
     }
@@ -110,18 +109,24 @@ public:
         if(m_sock)
             m_sock->closeSock();
     }
-    bool Send(uint8_t * data,uint32_t len) const {
+    bool Send(const toolkit::BufferRaw::Ptr& pkt) const {
         if(!m_sock){
             return false;
         }
         if(m_transportType == TCP_PASSIVE){
             if(m_ClientSock){
-                m_ClientSock->send((char*)data,len);
+                m_ClientSock->send(pkt);
             }
+        }
+        else if(m_transportType == UDP) {
+            m_sock->send(pkt,(sockaddr*)&m_udpRemote, sizeof(sockaddr));
         }else{
-            m_sock->send((char*)data,len);
+            m_sock->send(pkt);
         }
         return true;
+    }
+    void SetDataCallback(const toolkit::Socket::onReadCB& cb){
+        m_onRead = cb;
     }
 
 private:
@@ -133,6 +138,7 @@ private:
     std::string m_localAddr;
     toolkit::Socket::onReadCB m_onRead;
     volatile bool m_bindUdp = false;
+    struct sockaddr_storage m_udpRemote{};
 };
 
 

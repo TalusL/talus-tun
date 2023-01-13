@@ -3,35 +3,53 @@
 #ifndef TALUSTUN_TALUSTUNINTERFACE_H
 #define TALUSTUN_TALUSTUNINTERFACE_H
 #include <utility>
-#include <viface/viface.hpp>
-#include <viface/utils.hpp>
 #include <thread>
+#include <functional>
+#include <tuntap++.hh>
+#include "Network/Buffer.h"
 
-class TalusTunInterface : public viface::VIface {
+using DataCallback = std::function<void(const toolkit::BufferRaw::Ptr&)>;
+class TunIO:tuntap::tun{
+public:
+    explicit TunIO();
+    ~TunIO();
+    void SetIPv4(const std::string& ipv4);
+    void SetIPv4Netmask(uint netmask);
+    void SetMTU(uint mtu);
+    void Up();
+    void Down();
+    void Send(const toolkit::BufferRaw::Ptr&);
+    toolkit::BufferRaw::Ptr Receive();
+
+private:
+    std::string m_deviceName;
+    std::string m_ipv4;
+    uint m_netmask = 24;
+    uint m_mtu = 1420;
+};
+
+class TalusTunInterface :public TunIO {
 public:
     class TalusTunCfg{
     public:
-        TalusTunCfg(std::string ipv4Addr, std::string ipv4NetMark,
-                    std::string ipv4Broadcast, uint mtu,std::string mac)
+        TalusTunCfg(std::string ipv4Addr, uint ipv4NetMark,uint mtu)
                     : ipv4Addr(std::move(ipv4Addr)),
-                    ipv4NetMark(std::move(ipv4NetMark)),
-                    ipv4Broadcast(std::move(ipv4Broadcast)),
-                    mtu(mtu),mac(std::move(mac)){}
+                    ipv4NetMark(ipv4NetMark),
+                    mtu(mtu){}
 
         std::string ipv4Addr;
-        std::string ipv4NetMark;
-        std::string ipv4Broadcast;
-        std::string mac;
+        int ipv4NetMark = 24;
         uint mtu = 1400;
     };
     explicit TalusTunInterface(class TalusTunCfg& cfg);
     ~TalusTunInterface();
     //Listen on interface
-    bool Listen(const viface::dispatcher_cb& cb);
+    bool Listen(const DataCallback& cb);
     //Stop
-    void Stop();
-    //
+    void StopListen();
+    //genera mac
     static std::string GeneraMac();
+
 private:
     //select loop thread
     std::thread m_listenThread;
