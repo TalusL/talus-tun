@@ -23,7 +23,7 @@ int main(int argc,char **argv){
     if(argc>1){
         transport.Start();
     }else{
-        transport.Start(2556,"192.168.333.55");
+        transport.Start(2556,"192.168.1.55");
     }
 
     TalusTunInterface::TalusTunCfg cfg(argc>1?"192.168.111.1":"192.168.111.2",24,1400);
@@ -31,7 +31,7 @@ int main(int argc,char **argv){
     interface.Up();
 
     interface.Listen([&transport](const toolkit::BufferRaw::Ptr& pkt){
-        dump_packet_ipv4(pkt->size(), reinterpret_cast<char *>(pkt->data()));
+        dump_packet(pkt->size(), reinterpret_cast<char *>(pkt->data()));
 
         transport.Send(pkt);
 
@@ -39,7 +39,7 @@ int main(int argc,char **argv){
     });
 
     transport.SetDataCallback([&](const Buffer::Ptr &buf, struct sockaddr *addr, int addr_len){
-        dump_packet_ipv4(buf->size(), reinterpret_cast<char *>(buf->data()));
+        dump_packet(buf->size(), reinterpret_cast<char *>(buf->data()));
         toolkit::BufferRaw::Ptr pkt = toolkit::BufferRaw::create();
         pkt->assign(buf->data(), buf->size());
         interface.Send(pkt);
