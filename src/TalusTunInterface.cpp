@@ -42,12 +42,6 @@ void TalusTunInterface::StopListen() {
     }
 }
 
-std::string TalusTunInterface::GeneraMac() {
-    //make random mac
-    auto r = toolkit::trim(toolkit::hexmem(toolkit::makeRandStr(5, false).c_str(),5));
-    toolkit::replace(r," ",":");
-    return std::string("00:")+r;
-}
 
 static int tunIndex = 0;
 TunIO::TunIO() {

@@ -47,8 +47,6 @@ public:
     bool Listen(const DataCallback& cb);
     //Stop
     void StopListen();
-    //genera mac
-    static std::string GeneraMac();
 
 private:
     //select loop thread
