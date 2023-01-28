@@ -6,8 +6,8 @@
 #include <Util/util.h>
 #include <csignal>
 #include "PrintUtil.h"
-#include <Network/UdpServer.h>
-#include "SipSession.h"
+#include <Network/TcpServer.h>
+#include "Http/HttpSession.h"
 
 using namespace std;
 
@@ -49,8 +49,8 @@ int main(int argc,char **argv){
 //        interface.Send(pkt);
 //    });
 
-    UdpServer::Ptr sipSrv = make_shared<UdpServer>();
-    sipSrv->start<SipSession>(5060);
+    TcpServer::Ptr httpSrv = make_shared<TcpServer>();
+    httpSrv->start<mediakit::HttpSession>(8080);
 
 
     //设置退出信号处理函数
