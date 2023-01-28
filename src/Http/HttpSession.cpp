@@ -508,13 +508,10 @@ void HttpSession::sendNotFound(bool bClose) {
 }
 
 void HttpSession::setSocketFlags(){
-    GET_CONFIG(int, mergeWriteMS, General::kMergeWriteMS);
-    if(mergeWriteMS > 0) {
-        //推流模式下，关闭TCP_NODELAY会增加推流端的延时，但是服务器性能将提高
-        SockUtil::setNoDelay(getSock()->rawFD(), false);
-        //播放模式下，开启MSG_MORE会增加延时，但是能提高发送性能
-        setSendFlags(SOCKET_DEFAULE_FLAGS | FLAG_MORE);
-    }
+    //推流模式下，关闭TCP_NODELAY会增加推流端的延时，但是服务器性能将提高
+    SockUtil::setNoDelay(getSock()->rawFD(), false);
+    //播放模式下，开启MSG_MORE会增加延时，但是能提高发送性能
+    setSendFlags(SOCKET_DEFAULE_FLAGS | FLAG_MORE);
 }
 
 
