@@ -29,6 +29,7 @@ protected:
             auto cfg = split(configStr,",");
             if(cfg.size()!=4){
                 ErrorL<<"invalid cfg:"<<configStr;
+                return;
             }
             //config
             TalusTunInterface::Instance()->Stop();
