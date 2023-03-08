@@ -7,6 +7,8 @@
 #include <functional>
 #include <tuntap++.hh>
 #include "Network/Buffer.h"
+#include <map>
+#include <netinet/in.h>
 
 using DataCallback = std::function<void(const toolkit::BufferRaw::Ptr&)>;
 class TunIO:tuntap::tun{
@@ -38,21 +40,62 @@ public:
                     mtu(mtu){}
 
         std::string ipv4Addr;
-        int ipv4NetMark = 24;
+        uint ipv4NetMark = 24;
         uint mtu = 1400;
     };
-    explicit TalusTunInterface(class TalusTunCfg& cfg);
+    class Dispatcher{
+    public:
+        using Ptr = std::shared_ptr<Dispatcher>;
+        static Dispatcher::Ptr makeDispatcher(uint32_t addr,uint mask,const DataCallback&  cb){
+            auto d = std::make_shared<Dispatcher>();
+            d->m_addr = addr;
+            d->m_mask = mask;
+            d->m_cb = cb;
+            return d;
+        }
+        Dispatcher() = default;
+        uint32_t m_addr{};
+        uint m_mask{};
+        DataCallback m_cb;
+    };
+
+
+    void Config(const TalusTunCfg& cfg);
     ~TalusTunInterface();
     //Listen on interface
-    bool Listen(const DataCallback& cb);
+    bool Start();
     //Stop
-    void StopListen();
+    void Stop();
+    //Instance
+    static TalusTunInterface * Instance(){
+        static TalusTunInterface talusTunInterface;
+        return &talusTunInterface;
+    }
+    //addDispatcher
+    void addDispatcher(uint index,const Dispatcher::Ptr& dispatcher){
+        m_routerRules[index] = dispatcher;
+    }
 
 private:
+    std::mutex m_routerRulesMtx;
+    std::map<uint,Dispatcher::Ptr> m_routerRules;
     //select loop thread
     std::thread m_listenThread;
     //running flag
     volatile bool m_running = false;
+    //dispatch pkt
+    void dispatch(const toolkit::BufferRaw::Ptr& pkt){
+        std::lock_guard<std::mutex> lck(m_routerRulesMtx);
+        uint32_t addr = *((uint32_t*)pkt->data()+12);
+        for (const auto &router: m_routerRules){
+            if((addr&router.second->m_mask)==router.second->m_addr){
+                if(router.second->m_cb){
+                    router.second->m_cb(pkt);
+                }
+                return;
+            }
+        }
+    }
 };
 
 

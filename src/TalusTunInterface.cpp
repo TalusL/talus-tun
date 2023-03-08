@@ -10,24 +10,24 @@
 
 
 TalusTunInterface::~TalusTunInterface() {
-    StopListen();
+    Stop();
 }
 
-TalusTunInterface::TalusTunInterface(TalusTunCfg &cfg) {
+void TalusTunInterface::Config(const TalusTunCfg &cfg) {
     //Set CFG
     SetIPv4(cfg.ipv4Addr);
     SetIPv4Netmask(cfg.ipv4NetMark);
     SetMTU(cfg.mtu);
 }
 
-bool TalusTunInterface::Listen(const DataCallback &cb) {
-    StopListen();
+bool TalusTunInterface::Start() {
+    Stop();
     m_running = true;
-    m_listenThread = std::thread([cb, this](){
+    m_listenThread = std::thread([this](){
         while (m_running){
             auto pkt = Receive();
             if(pkt&&pkt->size()){
-                cb(pkt);
+                dispatch(pkt);
             }
         }
     });
@@ -35,7 +35,7 @@ bool TalusTunInterface::Listen(const DataCallback &cb) {
     return true;
 }
 
-void TalusTunInterface::StopListen() {
+void TalusTunInterface::Stop() {
     m_running = false;
     if(m_listenThread.joinable()){
         m_listenThread.join();
