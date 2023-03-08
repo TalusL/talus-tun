@@ -218,6 +218,7 @@ void splitUrl(const std::string &url, std::string &host, uint16_t &port) {
         return;
     }
     host = url.substr(0, pos);
+    sscanf(url.data() + pos + 1, "%" SCNu16, &port);
     checkHost(host);
 }
 

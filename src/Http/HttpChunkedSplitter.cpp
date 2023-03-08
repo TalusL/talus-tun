@@ -31,6 +31,7 @@ void HttpChunkedSplitter::onRecvContent(const char *data, size_t len) {
 
 ssize_t HttpChunkedSplitter::onRecvHeader(const char *data, size_t len) {
     int size;
+    sscanf(data, "%X", &size);
     //包括后面\r\n两个字节
     return size + 2;
 }
