@@ -29,7 +29,10 @@ protected:
     //被动断开连接回调
     void onErr(const SockException &ex) override {
         WarnL << ex.what();
-        dynamic_cast<WebSocketClient<TunWsClient,WebSocketHeader::BINARY,false>*>(this)->startWebSocket(m_cfgUrl, 5);
+        getPoller()->doDelayTask(1000,[this](){
+            dynamic_cast<WebSocketClient<TunWsClient,WebSocketHeader::BINARY,false>*>(this)->startWebSocket(m_cfgUrl, 5);
+            return 0;
+        });
     }
     //tcp连接成功后每2秒触发一次该事件
     void onManager() override {
@@ -40,7 +43,12 @@ protected:
     //连接服务器结果回调
     void onConnect(const SockException &ex) override{
         if(ex){
-            DebugL << ex.what();
+            DebugL << m_cfgUrl <<" " << ex.what();
+            getPoller()->doDelayTask(1000,[this](){
+                dynamic_cast<WebSocketClient<TunWsClient,WebSocketHeader::BINARY,false>*>(this)->startWebSocket(m_cfgUrl, 5);
+                return 0;
+            });
+            return;
         }
         m_ticker.resetTime();
         SockSender::send("GetTalusTunConfig");
