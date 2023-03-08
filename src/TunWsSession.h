@@ -26,7 +26,7 @@ public:
     void onRecv(const Buffer::Ptr &buffer) override {
         const std::string configCmd = "GetTalusTunConfig";
         if(buffer->size()>=configCmd.length()&& strncmp(configCmd.c_str(),buffer->data(),configCmd.size())==0){
-//            m_config = true;
+            m_config = true;
             SockSender::send("TalusTunConfig,192.168.122.222,24,1450");
         }
     }

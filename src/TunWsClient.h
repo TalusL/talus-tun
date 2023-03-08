@@ -7,6 +7,7 @@
 
 #include "Network/TcpClient.h"
 #include "Http/WebSocketClient.h"
+#include "TalusTunInterface.h"
 
 using namespace toolkit;
 using namespace mediakit;
@@ -23,12 +24,28 @@ protected:
         const std::string configCmd = "TalusTunConfig";
         if(pBuf->size()>configCmd.length()&& strncmp(configCmd.c_str(),pBuf->data(),configCmd.size())==0){
             m_config = true;
-            InfoL<<"Got tun config:"<<pBuf->toString();
+            auto configStr = pBuf->toString();
+            InfoL<<"Got tun config:"<<configStr;
+            auto cfg = split(configStr,",");
+            if(cfg.size()!=4){
+                ErrorL<<"invalid cfg:"<<configStr;
+            }
+            //config
+            TalusTunInterface::Instance()->Stop();
+            TalusTunInterface::Instance()->Down();
+            TalusTunInterface::Instance()->Config(TalusTunInterface::TalusTunCfg(cfg[1], std::stol(cfg[2]), std::stol(cfg[3])));
+            auto dispatcher = TalusTunInterface::Dispatcher::makeDispatcher(0,0,[this](const toolkit::BufferRaw::Ptr& pkt){
+                SockSender::send(pkt->data(),pkt->size());
+            });
+            TalusTunInterface::Instance()->AddDispatcher(0,dispatcher);
+            TalusTunInterface::Instance()->Up();
+            TalusTunInterface::Instance()->Start();
         }
     }
     //被动断开连接回调
     void onErr(const SockException &ex) override {
         WarnL << ex.what();
+        m_config = false;
         getPoller()->doDelayTask(1000,[this](){
             dynamic_cast<WebSocketClient<TunWsClient,WebSocketHeader::BINARY,false>*>(this)->startWebSocket(m_cfgUrl, 5);
             return 0;

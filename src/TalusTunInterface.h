@@ -71,8 +71,8 @@ public:
         static TalusTunInterface talusTunInterface;
         return &talusTunInterface;
     }
-    //addDispatcher
-    void addDispatcher(uint index,const Dispatcher::Ptr& dispatcher){
+    //AddDispatcher
+    void AddDispatcher(uint index, const Dispatcher::Ptr& dispatcher){
         m_routerRules[index] = dispatcher;
     }
 
