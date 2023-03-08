@@ -5,8 +5,8 @@
 #include <Network/TcpServer.h>
 #include "Http/HttpSession.h"
 
-#include "WsClient.h"
-#include "WsSession.h"
+#include "TunWsClient.h"
+#include "TunWsSession.h"
 
 #include "Http/WebSocketClient.h"
 
@@ -17,7 +17,7 @@ using namespace mediakit;
 struct WsSessionCreator {
     //返回的Session必须派生于SendInterceptor，可以返回null(拒绝连接)
     Session::Ptr operator()(const Parser &header, const HttpSession &parent, const Socket::Ptr &pSock) {
-        return std::make_shared<SessionTypeImp<WsSession> >(header, parent, pSock);
+        return std::make_shared<SessionTypeImp<TunWsSession> >(header, parent, pSock);
     }
 };
 
@@ -40,10 +40,10 @@ int main(int argc,char **argv){
         httpSrv->start<WebSocketSessionBase<WsSessionCreator, HttpSession> >(8989,"0.0.0.0");
         sem.wait();
     } else {
-        auto client = make_shared<WebSocketClient<WsClient,WebSocketHeader::BINARY,false>>();
+        auto client = make_shared<WebSocketClient<TunWsClient,WebSocketHeader::BINARY,false>>();
         sleep(2);
         auto cfgUrl = "ws://127.0.0.1:8989/ww";
-        dynamic_pointer_cast<WsClient>(client)->SetCfgUrl(cfgUrl);
+        dynamic_pointer_cast<TunWsClient>(client)->SetCfgUrl(cfgUrl);
         client->startWebSocket(cfgUrl, 5);
         sem.wait();
     }

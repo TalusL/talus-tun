@@ -2,8 +2,8 @@
 // Created by Wind on 2023/3/8.
 //
 
-#ifndef TALUSTUN_WSSESSION_H
-#define TALUSTUN_WSSESSION_H
+#ifndef TALUSTUN_TUNWSSESSION_H
+#define TALUSTUN_TUNWSSESSION_H
 
 #include "Util/logger.h"
 #include "Http/WebSocketSession.h"
@@ -13,11 +13,11 @@ using namespace toolkit;
 using namespace mediakit;
 
 
-class WsSession : public Session {
+class TunWsSession : public Session {
 public:
-    explicit WsSession(const Socket::Ptr &pSock) : Session(pSock){
+    explicit TunWsSession(const Socket::Ptr &pSock) : Session(pSock){
     }
-    ~WsSession() override= default;
+    ~TunWsSession() override= default;
 
     void attachServer(const Server &server) override{
         InfoL<< toolkit::SocketHelper::get_peer_ip()<<":"<<toolkit::SocketHelper::get_peer_port()<<" ws connect!";
@@ -43,4 +43,4 @@ public:
     Ticker m_ticker;
 };
 
-#endif //TALUSTUN_WSSESSION_H
+#endif //TALUSTUN_TUNWSSESSION_H

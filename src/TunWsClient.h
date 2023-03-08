@@ -2,19 +2,19 @@
 // Created by Wind on 2023/3/8.
 //
 
-#ifndef TALUSTUN_WSCLIENT_H
-#define TALUSTUN_WSCLIENT_H
+#ifndef TALUSTUN_TUNWSCLIENT_H
+#define TALUSTUN_TUNWSCLIENT_H
 
 #include "Network/TcpClient.h"
 #include "Http/WebSocketClient.h"
 
 using namespace toolkit;
 using namespace mediakit;
-class WsClient : public TcpClient {
+class TunWsClient : public TcpClient {
 public:
-    explicit WsClient(const EventPoller::Ptr &poller = nullptr){
+    explicit TunWsClient(const EventPoller::Ptr &poller = nullptr){
     }
-    ~WsClient() override = default;
+    ~TunWsClient() override = default;
     void SetCfgUrl(const std::string& url){
         m_cfgUrl = url;
     }
@@ -29,7 +29,7 @@ protected:
     //被动断开连接回调
     void onErr(const SockException &ex) override {
         WarnL << ex.what();
-        dynamic_cast<WebSocketClient<WsClient,WebSocketHeader::BINARY,false>*>(this)->startWebSocket(m_cfgUrl, 5);
+        dynamic_cast<WebSocketClient<TunWsClient,WebSocketHeader::BINARY,false>*>(this)->startWebSocket(m_cfgUrl, 5);
     }
     //tcp连接成功后每2秒触发一次该事件
     void onManager() override {
@@ -54,4 +54,4 @@ protected:
 };
 
 
-#endif //TALUSTUN_WSCLIENT_H
+#endif //TALUSTUN_TUNWSCLIENT_H
