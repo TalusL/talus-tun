@@ -42,7 +42,9 @@ int main(int argc,char **argv){
     } else {
         auto client = make_shared<WebSocketClient<WsClient,WebSocketHeader::BINARY,false>>();
         sleep(2);
-        client->startWebSocket("ws://127.0.0.1:8989/ww", 5);
+        auto cfgUrl = "ws://127.0.0.1:8989/ww";
+        dynamic_pointer_cast<WsClient>(client)->SetCfgUrl(cfgUrl);
+        client->startWebSocket(cfgUrl, 5);
         sem.wait();
     }
 
