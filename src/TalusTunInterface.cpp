@@ -43,10 +43,10 @@ void TalusTunInterface::Stop() {
 }
 
 
-static int tunIndex = 0;
 TunIO::TunIO() {
-    this->name("Talus"+ std::to_string(tunIndex));
-    tunIndex++;
+    std::mt19937 random(std::random_device{}());
+    std::uniform_int_distribution<unsigned int> generator(0, 99);
+    this->name("Talus"+ std::to_string(generator(random)));
     m_deviceName = this->name();
 }
 

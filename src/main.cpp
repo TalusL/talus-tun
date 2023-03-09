@@ -38,6 +38,14 @@ int main(int argc,char **argv){
         TcpServer::Ptr httpSrv(new TcpServer());
         //http服务器,支持websocket
         httpSrv->start<WebSocketSessionBase<WsSessionCreator, HttpSession> >(8989,"0.0.0.0");
+
+        //config
+        TalusTunInterface::Instance()->Stop();
+        TalusTunInterface::Instance()->Down();
+        TalusTunInterface::Instance()->Config(TalusTunInterface::TalusTunCfg("192.168.122.1", 24, 1450));
+        TalusTunInterface::Instance()->Up();
+        TalusTunInterface::Instance()->Start();
+
         sem.wait();
     } else {
         auto client = make_shared<WebSocketClient<TunWsClient,WebSocketHeader::BINARY,false>>();
