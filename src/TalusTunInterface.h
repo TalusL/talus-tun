@@ -106,9 +106,12 @@ private:
         std::lock_guard<std::mutex> lck(m_routerRulesMtx);
         uint32_t addr = *((uint32_t*)(pkt->data()+16));
         for (const auto &router: m_routerRules){
-            auto mask = 0xFFFFFFFF^(0xFFFFFFFF << router.second->m_mask);
-            DebugL<<getIp(addr)<<" "<<router.second->m_mask<<" "<<getIp(addr&mask)<<" == "<<getIp(router.second->m_addr);
-            if((addr&mask)==router.second->m_addr){
+            auto mask = ~htonl(router.second->m_mask>=32?0:(0xFFFFFFFF >> router.second->m_mask));
+            auto raddr = addr&mask;
+            auto laddr = router.second->m_addr&mask;
+
+            DebugL<< getIp(mask) <<" "<<getIp(addr)<<" "<<getIp(router.second->m_addr)<<" "<<getIp(raddr)<<" == "<<getIp(laddr);
+            if(raddr==laddr){
                 if(router.second->m_cb){
                     router.second->m_cb(pkt);
                 }
