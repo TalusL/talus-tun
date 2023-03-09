@@ -7,6 +7,7 @@
 
 #include "Util/logger.h"
 #include "Http/WebSocketSession.h"
+#include "TunAddrAlloc.h"
 
 using namespace std;
 using namespace toolkit;
@@ -26,12 +27,19 @@ public:
     void onRecv(const Buffer::Ptr &buffer) override {
         const std::string configCmd = "GetTalusTunConfig";
         if(buffer->size()>=configCmd.length()&& strncmp(configCmd.c_str(),buffer->data(),configCmd.size())==0){
+            static uint mask = 24;
+            static uint mtu = 1450;
+
             m_config = true;
-            SockSender::send("TalusTunConfig,192.168.122.222,24,1450");
+            string addr = TunAddrAlloc::Instance()->AllocAddr();
+            m_addr = addr;
+            string response = StrPrinter << "TalusTunConfig,"<< addr << "," << mask << "," << mtu;
+            SockSender::send(response);
         }
     }
     void onError(const SockException &err) override{
         WarnL << err.what();
+        TunAddrAlloc::Instance()->releaseAddr(m_addr);
     }
     //每隔一段时间触发，用来做超时管理
     void onManager() override{
@@ -41,6 +49,7 @@ public:
     }
     bool m_config = false;
     Ticker m_ticker;
+    string m_addr;
 };
 
 #endif //TALUSTUN_TUNWSSESSION_H
