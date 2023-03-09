@@ -21,7 +21,7 @@ public:
     }
 protected:
     void onRecv(const Buffer::Ptr &pBuf) override {
-        InfoL<<"recv from ws:"<<pBuf->size();
+//        InfoL<<"recv from ws:"<<pBuf->size();
         const std::string configCmd = "TalusTunConfig";
         if(pBuf->size()>configCmd.length()&& strncmp(configCmd.c_str(),pBuf->data(),configCmd.size())==0){
             m_config = true;
@@ -37,15 +37,15 @@ protected:
             TalusTunInterface::Instance()->Down();
             TalusTunInterface::Instance()->Config(TalusTunInterface::TalusTunCfg(cfg[1], std::stol(cfg[2]), std::stol(cfg[3])));
             auto dispatcher = TalusTunInterface::Dispatcher::makeDispatcher("0.0.0.0",0,[this](const toolkit::BufferRaw::Ptr& pkt){
-                InfoL<<"recv from tun:"<<pkt->size();
-                InfoL<<"send to ws:"<<pkt->size();
+//                InfoL<<"recv from tun:"<<pkt->size();
+//                InfoL<<"send to ws:"<<pkt->size();
                 SockSender::send(pkt->data(),pkt->size());
             });
             TalusTunInterface::Instance()->AddDispatcher(0,dispatcher);
             TalusTunInterface::Instance()->Up();
             TalusTunInterface::Instance()->Start();
         }else{
-            InfoL<<"send to tun:"<<pBuf->size();
+//            InfoL<<"send to tun:"<<pBuf->size();
             TalusTunInterface::Instance()->Send(pBuf);
         }
     }

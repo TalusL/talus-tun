@@ -25,7 +25,7 @@ public:
         m_ticker.resetTime();
     }
     void onRecv(const Buffer::Ptr &buffer) override {
-        InfoL<<"recv from ws:"<<buffer->size();
+//        InfoL<<"recv from ws:"<<buffer->size();
         const std::string configCmd = "GetTalusTunConfig";
         if(buffer->size()>=configCmd.length()&& strncmp(configCmd.c_str(),buffer->data(),configCmd.size())==0){
             static uint mask = 24;
@@ -40,14 +40,14 @@ public:
                 <<" <-> "<<addr << "/" << mask << "," << mtu;
 
             auto dispatcher = TalusTunInterface::Dispatcher::makeDispatcher(addr,32,[this](const toolkit::BufferRaw::Ptr& pkt){
-                InfoL<<"recv from tun:"<<pkt->size();
-                InfoL<<"send to ws:"<<pkt->size();
+//                InfoL<<"recv from tun:"<<pkt->size();
+//                InfoL<<"send to ws:"<<pkt->size();
                 SockSender::send(pkt->data(),pkt->size());
             });
             TalusTunInterface::Instance()->AddDispatcher(0,dispatcher);
             SockSender::send(response);
         }else{
-            InfoL<<"send to tun:"<<buffer->size();
+//            InfoL<<"send to tun:"<<buffer->size();
             TalusTunInterface::Instance()->Send(buffer);
         }
     }
