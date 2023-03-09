@@ -49,7 +49,6 @@ int main(int argc,char **argv){
         sem.wait();
     } else {
         auto client = make_shared<WebSocketClient<TunWsClient,WebSocketHeader::BINARY,false>>();
-        sleep(2);
         auto cfgUrl = "ws://113.90.24.95:8989/ww";
         dynamic_pointer_cast<TunWsClient>(client)->SetCfgUrl(cfgUrl);
         client->startWebSocket(cfgUrl, 5);
