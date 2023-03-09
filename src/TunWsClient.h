@@ -35,7 +35,7 @@ protected:
             TalusTunInterface::Instance()->Stop();
             TalusTunInterface::Instance()->Down();
             TalusTunInterface::Instance()->Config(TalusTunInterface::TalusTunCfg(cfg[1], std::stol(cfg[2]), std::stol(cfg[3])));
-            auto dispatcher = TalusTunInterface::Dispatcher::makeDispatcher(0,0,[this](const toolkit::BufferRaw::Ptr& pkt){
+            auto dispatcher = TalusTunInterface::Dispatcher::makeDispatcher("0.0.0.0",0,[this](const toolkit::BufferRaw::Ptr& pkt){
                 SockSender::send(pkt->data(),pkt->size());
             });
             TalusTunInterface::Instance()->AddDispatcher(0,dispatcher);

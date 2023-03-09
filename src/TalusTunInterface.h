@@ -9,6 +9,10 @@
 #include "Network/Buffer.h"
 #include <map>
 #include <netinet/in.h>
+#include "Util/util.h"
+#include "Network/sockutil.h"
+
+using namespace toolkit;
 
 using DataCallback = std::function<void(const toolkit::BufferRaw::Ptr&)>;
 class TunIO:tuntap::tun{
@@ -20,7 +24,7 @@ public:
     void SetMTU(uint mtu);
     void Up();
     void Down();
-    void Send(const toolkit::BufferRaw::Ptr&);
+    void Send(const toolkit::Buffer::Ptr&);
     toolkit::BufferRaw::Ptr Receive();
 
 private:
@@ -46,9 +50,12 @@ public:
     class Dispatcher{
     public:
         using Ptr = std::shared_ptr<Dispatcher>;
-        static Dispatcher::Ptr makeDispatcher(uint32_t addr,uint mask,const DataCallback&  cb){
+        static Dispatcher::Ptr makeDispatcher(const std::string& addr,uint mask,const DataCallback&  cb){
+            sockaddr_storage taddr;
+            SockUtil::getDomainIP(addr.c_str(), 0, taddr, AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
             auto d = std::make_shared<Dispatcher>();
-            d->m_addr = addr;
+            d->m_addr = ((sockaddr_in*)&taddr)->sin_addr.s_addr;
             d->m_mask = mask;
             d->m_cb = cb;
             return d;

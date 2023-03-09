@@ -34,7 +34,18 @@ public:
             string addr = TunAddrAlloc::Instance()->AllocAddr();
             m_addr = addr;
             string response = StrPrinter << "TalusTunConfig,"<< addr << "," << mask << "," << mtu;
+
+            InfoL<<"Addr alloc remote: "<<toolkit::SocketHelper::get_peer_ip()<<":"<<toolkit::SocketHelper::get_peer_port()
+                <<" <-> "<<addr << "/" << mask << "," << mtu;
+
+            auto dispatcher = TalusTunInterface::Dispatcher::makeDispatcher(addr,mask,[this](const toolkit::BufferRaw::Ptr& pkt){
+                SockSender::send(pkt->data(),pkt->size());
+            });
+            TalusTunInterface::Instance()->AddDispatcher(0,dispatcher);
+
             SockSender::send(response);
+        }else{
+            TalusTunInterface::Instance()->Send(buffer);
         }
     }
     void onError(const SockException &err) override{

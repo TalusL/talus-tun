@@ -33,7 +33,7 @@ int main(int argc,char **argv){
         signal(SIGINT, SIG_IGN);// 设置退出信号
         sem.post();
     });// 设置退出信号
-    if(pid != 0){
+    if(pid == 0){
 //    if(argc>1&&string(argv[1])=="-s"){
         TcpServer::Ptr httpSrv(new TcpServer());
         //http服务器,支持websocket

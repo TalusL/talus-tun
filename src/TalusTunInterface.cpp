@@ -88,7 +88,7 @@ void TunIO::Up() {
 }
 
 
-void TunIO::Send(const toolkit::BufferRaw::Ptr& data) {
+void TunIO::Send(const toolkit::Buffer::Ptr& data) {
     write(data->data(),data->size());
 }
 
