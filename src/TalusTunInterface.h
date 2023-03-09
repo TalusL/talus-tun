@@ -110,7 +110,7 @@ private:
             auto raddr = addr&mask;
             auto laddr = router.second->m_addr&mask;
 
-            DebugL<< getIp(mask) <<" "<<getIp(addr)<<" "<<getIp(router.second->m_addr)<<" "<<getIp(raddr)<<" == "<<getIp(laddr);
+//            DebugL<< getIp(mask) <<" "<<getIp(addr)<<" "<<getIp(router.second->m_addr)<<" "<<getIp(raddr)<<" == "<<getIp(laddr);
             if(raddr==laddr){
                 if(router.second->m_cb){
                     router.second->m_cb(pkt);
