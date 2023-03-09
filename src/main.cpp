@@ -24,7 +24,7 @@ struct WsSessionCreator {
 int main(int argc,char **argv){
     Logger::Instance().add(std::make_shared<ConsoleChannel> ());
 
-    auto pid = fork();
+//    auto pid = fork();
 
     //设置退出信号处理函数
     static semaphore sem;
@@ -33,8 +33,8 @@ int main(int argc,char **argv){
         signal(SIGINT, SIG_IGN);// 设置退出信号
         sem.post();
     });// 设置退出信号
-    if(pid == 0){
-//    if(argc>1&&string(argv[1])=="-s"){
+//    if(pid == 0){
+    if(argc>1&&string(argv[1])=="-s"){
         TcpServer::Ptr httpSrv(new TcpServer());
         //http服务器,支持websocket
         httpSrv->start<WebSocketSessionBase<WsSessionCreator, HttpSession> >(8989,"0.0.0.0");
@@ -50,7 +50,7 @@ int main(int argc,char **argv){
     } else {
         auto client = make_shared<WebSocketClient<TunWsClient,WebSocketHeader::BINARY,false>>();
         sleep(2);
-        auto cfgUrl = "ws://127.0.0.1:8989/ww";
+        auto cfgUrl = "ws://113.90.24.95:8989/ww";
         dynamic_pointer_cast<TunWsClient>(client)->SetCfgUrl(cfgUrl);
         client->startWebSocket(cfgUrl, 5);
         sem.wait();

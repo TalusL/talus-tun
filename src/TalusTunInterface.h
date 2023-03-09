@@ -11,6 +11,7 @@
 #include <netinet/in.h>
 #include "Util/util.h"
 #include "Network/sockutil.h"
+#include "Util/logger.h"
 
 using namespace toolkit;
 
@@ -92,10 +93,22 @@ private:
     volatile bool m_running = false;
     //dispatch pkt
     void dispatch(const toolkit::BufferRaw::Ptr& pkt){
+
+        auto getIp = [](uint32_t n){
+            std::string ip = StrPrinter
+                    <<std::to_string(*((uint8_t*)(&n)+0))<<"."
+                    <<std::to_string(*((uint8_t*)(&n)+1))<<"."
+                    <<std::to_string(*((uint8_t*)(&n)+2))<<"."
+                    <<std::to_string(*((uint8_t*)(&n)+3));
+            return ip;
+        };
+
         std::lock_guard<std::mutex> lck(m_routerRulesMtx);
-        uint32_t addr = *((uint32_t*)pkt->data()+12);
+        uint32_t addr = *((uint32_t*)(pkt->data()+16));
         for (const auto &router: m_routerRules){
-            if((addr&router.second->m_mask)==router.second->m_addr){
+            auto mask = 0xFFFFFFFF^(0xFFFFFFFF << router.second->m_mask);
+            DebugL<<getIp(addr)<<" "<<router.second->m_mask<<" "<<getIp(addr&mask)<<" == "<<getIp(router.second->m_addr);
+            if((addr&mask)==router.second->m_addr){
                 if(router.second->m_cb){
                     router.second->m_cb(pkt);
                 }
