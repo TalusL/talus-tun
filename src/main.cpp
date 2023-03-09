@@ -24,7 +24,6 @@ struct WsSessionCreator {
 int main(int argc,char **argv){
     Logger::Instance().add(std::make_shared<ConsoleChannel> ());
 
-//    auto pid = fork();
 
     //设置退出信号处理函数
     static semaphore sem;
@@ -33,7 +32,7 @@ int main(int argc,char **argv){
         signal(SIGINT, SIG_IGN);// 设置退出信号
         sem.post();
     });// 设置退出信号
-//    if(pid == 0){
+
     if(argc>1&&string(argv[1])=="-s"){
         TcpServer::Ptr httpSrv(new TcpServer());
         //http服务器,支持websocket
