@@ -20,6 +20,7 @@
 #define CONFIG_SSL_CERT SERVER_CONFIG"sslCert"
 #define CONFIG_ADDR_ALLOC_BEGIN SERVER_CONFIG"addrAllocBegin"
 #define CONFIG_ADDR_ALLOC_END SERVER_CONFIG"addrAllocEnd"
+#define CONFIG_ENABLE_SSL SERVER_CONFIG"enableSsl"
 
 
 #define CLIENT_CONFIG "talusTunClient."

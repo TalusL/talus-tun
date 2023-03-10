@@ -31,6 +31,7 @@ mINI::Instance()[CONFIG_WS_URL] = "wss://127.0.0.1:8443/ww";
 mINI::Instance()[CONFIG_SSL_CERT] = "./default.pem";
 mINI::Instance()[CONFIG_ADDR_ALLOC_BEGIN] = 100;
 mINI::Instance()[CONFIG_ADDR_ALLOC_END] = 200;
+mINI::Instance()[CONFIG_ENABLE_SSL] = false;
 });
 
 struct WsSessionCreator {
@@ -79,8 +80,8 @@ int main(int argc,char **argv){
     int tunNetMtu = mINI::Instance()[CONFIG_TUN_NET_MTU];
     string wsUrl = mINI::Instance()[CONFIG_WS_URL];
     string sslCert = mINI::Instance()[CONFIG_SSL_CERT];
+    bool enableSsl = mINI::Instance()[CONFIG_ENABLE_SSL];
 
-    SSL_Initor::Instance().loadCertificate(sslCert);
 
     //设置退出信号处理函数
     static semaphore sem;
@@ -92,8 +93,14 @@ int main(int argc,char **argv){
 
     if(mode == 1){
         TcpServer::Ptr httpSrv(new TcpServer());
-        //http服务器,支持websocket
-        httpSrv->start<WebSocketSessionBase<WsSessionCreator, HttpsSession> >(listenPort,listenIp);
+
+        if(enableSsl){
+            SSL_Initor::Instance().loadCertificate(sslCert);
+            httpSrv->start<WebSocketSessionBase<WsSessionCreator, HttpsSession> >(listenPort,listenIp);
+        }else{
+            httpSrv->start<WebSocketSessionBase<WsSessionCreator, HttpSession> >(listenPort,listenIp);
+        }
+
 
         //config
         TalusTunInterface::Instance()->Stop();
