@@ -23,11 +23,11 @@ onceToken tk([](){
 mINI::Instance()[CONFIG_MODE] = 2;
 mINI::Instance()[CONFIG_NAME] = "Talus0";
 mINI::Instance()[CONFIG_WS_LISTEN_IP] = "0.0.0.0";
-mINI::Instance()[CONFIG_WS_LISTEN_PORT] = 443;
+mINI::Instance()[CONFIG_WS_LISTEN_PORT] = 8989;
 mINI::Instance()[CONFIG_TUN_NET_IP] = "10.22.33.1";
 mINI::Instance()[CONFIG_TUN_NET_MASK] = "24";
 mINI::Instance()[CONFIG_TUN_NET_MTU] = 1450;
-mINI::Instance()[CONFIG_WS_URL] = "wss://127.0.0.1:8443/ww";
+mINI::Instance()[CONFIG_WS_URL] = "ws://127.0.0.1:8989/ubuntu.iso";
 mINI::Instance()[CONFIG_SSL_CERT] = "./default.pem";
 mINI::Instance()[CONFIG_ADDR_ALLOC_BEGIN] = 100;
 mINI::Instance()[CONFIG_ADDR_ALLOC_END] = 200;
