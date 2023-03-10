@@ -1,0 +1,14 @@
+[Unit]
+Description=TalusTun
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/usr/share/talusTun
+User=root
+Group=root
+ExecStart=./TalusTun ./TalusTun.ini
+ExecStop=/bin/kill -s SIGINT \$MAINPID
+
+[Install]
+WantedBy=multi-user.target
