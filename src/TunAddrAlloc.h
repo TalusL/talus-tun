@@ -9,6 +9,7 @@
 #include <mutex>
 #include <string>
 #include <regex>
+#include "Config.h"
 
 using namespace std;
 
@@ -20,9 +21,9 @@ public:
         return &tunAddrAlloc;
     }
     string AllocAddr(){
-        static int startAddr = 100;
-        static int endAddr = 200;
-        static string ip = "192.168.122.1";
+        static int startAddr = mINI::Instance()[CONFIG_ADDR_ALLOC_BEGIN];
+        static int endAddr = mINI::Instance()[CONFIG_ADDR_ALLOC_END];
+        static string ip = mINI::Instance()[CONFIG_TUN_NET_IP];
         if(m_currIndex<0){
             m_currIndex = startAddr;
         }

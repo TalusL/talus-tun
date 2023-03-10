@@ -1,6 +1,8 @@
 
 #include <random>
 #include "TalusTunInterface.h"
+#include "Util/mini.h"
+#include "Config.h"
 #include <Util/util.h>
 #include <netinet/in.h>
 #include <net/if.h>
@@ -44,9 +46,8 @@ void TalusTunInterface::Stop() {
 
 
 TunIO::TunIO() {
-    std::mt19937 random(std::random_device{}());
-    std::uniform_int_distribution<unsigned int> generator(0, 99);
-    this->name("Talus"+ std::to_string(generator(random)));
+    std::string tunName = mINI::Instance()[CONFIG_NAME];
+    this->name(tunName);
     m_deviceName = this->name();
 }
 

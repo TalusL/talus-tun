@@ -28,8 +28,8 @@ public:
 //        InfoL<<"recv from ws:"<<buffer->size();
         const std::string configCmd = "GetTalusTunConfig";
         if(buffer->size()>=configCmd.length()&& strncmp(configCmd.c_str(),buffer->data(),configCmd.size())==0){
-            static uint mask = 24;
-            static uint mtu = 1450;
+            static uint mask = mINI::Instance()[CONFIG_TUN_NET_MASK];
+            static uint mtu = mINI::Instance()[CONFIG_TUN_NET_MTU];
 
             m_config = true;
             string addr = TunAddrAlloc::Instance()->AllocAddr();
