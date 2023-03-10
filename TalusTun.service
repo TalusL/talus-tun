@@ -7,7 +7,7 @@ Type=simple
 WorkingDirectory=/usr/share/talusTun
 User=root
 Group=root
-ExecStart=./TalusTun ./TalusTun.ini
+ExecStart=/usr/share/talusTun/TalusTun /usr/share/talusTun/TalusTun.ini
 ExecStop=/bin/kill -s SIGINT \$MAINPID
 
 [Install]
