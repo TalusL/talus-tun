@@ -29,7 +29,7 @@ bool TalusTunInterface::Start() {
         while (m_running){
             auto pkt = Receive();
             if(pkt&&pkt->size()){
-                dispatch(pkt);
+                Dispatch(pkt);
             }
         }
     });
@@ -113,4 +113,45 @@ toolkit::BufferRaw::Ptr TunIO::Receive() {
     auto pkt = toolkit::BufferRaw::create();
     pkt->assign(reinterpret_cast<const char *>(vector.data()), size);
     return pkt;
+}
+
+void TalusTunInterface::Dispatch(const toolkit::Buffer::Ptr& pkt){
+
+    auto getIp = [](uint32_t n){
+        std::string ip = StrPrinter
+                <<std::to_string(*((uint8_t*)(&n)+0))<<"."
+                <<std::to_string(*((uint8_t*)(&n)+1))<<"."
+                <<std::to_string(*((uint8_t*)(&n)+2))<<"."
+                <<std::to_string(*((uint8_t*)(&n)+3));
+        return ip;
+    };
+
+    std::lock_guard<std::mutex> lck(m_routerRulesMtx);
+    uint32_t addr = *((uint32_t*)(pkt->data()+16));
+    for (const auto &router: m_routerRules){
+        auto mask = ~htonl(router.second->m_mask>=32?0:(0xFFFFFFFF >> router.second->m_mask));
+        auto raddr = addr&mask;
+        auto laddr = router.second->m_addr&mask;
+
+//            DebugL<< getIp(mask) <<" "<<getIp(addr)<<" "<<getIp(router.second->m_addr)<<" "<<getIp(raddr)<<" == "<<getIp(laddr);
+        if(raddr==laddr){
+            if(router.second->m_cb){
+                router.second->m_cb(pkt);
+            }
+            return;
+        }
+    }
+}
+
+bool TalusTunInterface::isOnLinkPkt(const Buffer::Ptr &buf) {
+    static std::string tunNetIp = mINI::Instance()[CONFIG_TUN_NET_IP];
+    static int tunNetMask = mINI::Instance()[CONFIG_TUN_NET_MASK];
+    static uint32_t local_addr = 0;
+    static auto mask = ~htonl(tunNetMask >= 32 ? 0 : (0xFFFFFFFF >> tunNetMask));
+    if (!local_addr) {
+        sockaddr_storage taddr;
+        SockUtil::getDomainIP(tunNetIp.c_str(), 0, taddr, AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        local_addr = ((sockaddr_in *) &taddr)->sin_addr.s_addr;
+    }
+    return (*((uint32_t*)buf->data()+16) & mask) == (local_addr && mask);
 }

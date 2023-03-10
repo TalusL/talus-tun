@@ -47,7 +47,7 @@ public:
             InfoL<<"Addr alloc remote: "<<toolkit::SocketHelper::get_peer_ip()<<":"<<toolkit::SocketHelper::get_peer_port()
                 <<" <-> "<<addr << "/" << mask << "," << mtu;
 
-            auto dispatcher = TalusTunInterface::Dispatcher::makeDispatcher(addr,32,[this](const toolkit::BufferRaw::Ptr& pkt){
+            auto dispatcher = TalusTunInterface::Dispatcher::makeDispatcher(addr,32,[this](const toolkit::Buffer::Ptr& pkt){
 //                InfoL<<"recv from tun:"<<pkt->size();
 //                InfoL<<"send to ws:"<<pkt->size();
                 if(!m_config){
@@ -63,6 +63,10 @@ public:
             SockSender::send(repBuf->data(),repBuf->size());
         }else{
             if(!m_config){
+                return;
+            }
+            if(TalusTunInterface::isOnLinkPkt(buffer)){
+                TalusTunInterface::Instance()->Dispatch(buffer);
                 return;
             }
 //            InfoL<<"send to tun:"<<buffer->size();

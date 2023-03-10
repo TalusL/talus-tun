@@ -15,7 +15,7 @@
 
 using namespace toolkit;
 
-using DataCallback = std::function<void(const toolkit::BufferRaw::Ptr&)>;
+using DataCallback = std::function<void(const toolkit::Buffer::Ptr&)>;
 class TunIO:tuntap::tun{
 public:
     explicit TunIO();
@@ -83,6 +83,10 @@ public:
     void AddDispatcher(uint index, const Dispatcher::Ptr& dispatcher){
         m_routerRules[index] = dispatcher;
     }
+    //check if pkt on same subnet
+    static bool isOnLinkPkt(const Buffer::Ptr &buf);
+    //Dispatch pkt
+    void Dispatch(const toolkit::Buffer::Ptr& pkt);
 
 private:
     std::mutex m_routerRulesMtx;
@@ -91,34 +95,6 @@ private:
     std::thread m_listenThread;
     //running flag
     volatile bool m_running = false;
-    //dispatch pkt
-    void dispatch(const toolkit::BufferRaw::Ptr& pkt){
-
-        auto getIp = [](uint32_t n){
-            std::string ip = StrPrinter
-                    <<std::to_string(*((uint8_t*)(&n)+0))<<"."
-                    <<std::to_string(*((uint8_t*)(&n)+1))<<"."
-                    <<std::to_string(*((uint8_t*)(&n)+2))<<"."
-                    <<std::to_string(*((uint8_t*)(&n)+3));
-            return ip;
-        };
-
-        std::lock_guard<std::mutex> lck(m_routerRulesMtx);
-        uint32_t addr = *((uint32_t*)(pkt->data()+16));
-        for (const auto &router: m_routerRules){
-            auto mask = ~htonl(router.second->m_mask>=32?0:(0xFFFFFFFF >> router.second->m_mask));
-            auto raddr = addr&mask;
-            auto laddr = router.second->m_addr&mask;
-
-//            DebugL<< getIp(mask) <<" "<<getIp(addr)<<" "<<getIp(router.second->m_addr)<<" "<<getIp(raddr)<<" == "<<getIp(laddr);
-            if(raddr==laddr){
-                if(router.second->m_cb){
-                    router.second->m_cb(pkt);
-                }
-                return;
-            }
-        }
-    }
 };
 
 
