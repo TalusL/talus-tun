@@ -32,6 +32,7 @@ mINI::Instance()[CONFIG_SSL_CERT] = "./default.pem";
 mINI::Instance()[CONFIG_ADDR_ALLOC_BEGIN] = 100;
 mINI::Instance()[CONFIG_ADDR_ALLOC_END] = 200;
 mINI::Instance()[CONFIG_ENABLE_SSL] = false;
+mINI::Instance()[CONFIG_PASS] = "TalusTun0123456789";
 });
 
 struct WsSessionCreator {
@@ -67,8 +68,8 @@ int main(int argc,char **argv){
         return -1;
     }
 
-    bool kill_parent_if_failed = true;
-    System::startDaemon(kill_parent_if_failed);
+//    bool kill_parent_if_failed = true;
+//    System::startDaemon(kill_parent_if_failed);
 
     loadIniConfig(argv[1]);
 

@@ -8,6 +8,7 @@
 #include "Network/TcpClient.h"
 #include "Http/WebSocketClient.h"
 #include "TalusTunInterface.h"
+#include "DataFilter.h"
 
 using namespace toolkit;
 using namespace mediakit;
@@ -21,6 +22,7 @@ public:
     }
 protected:
     void onRecv(const Buffer::Ptr &pBuf) override {
+        DataFilter::Filter(pBuf);
 //        InfoL<<"recv from ws:"<<pBuf->size();
         const std::string configCmd = "TalusTunConfig";
         if(pBuf->size()>configCmd.length()&& strncmp(configCmd.c_str(),pBuf->data(),configCmd.size())==0){
@@ -39,12 +41,19 @@ protected:
             auto dispatcher = TalusTunInterface::Dispatcher::makeDispatcher("0.0.0.0",0,[this](const toolkit::BufferRaw::Ptr& pkt){
 //                InfoL<<"recv from tun:"<<pkt->size();
 //                InfoL<<"send to ws:"<<pkt->size();
+                if(!m_config){
+                    return;
+                }
+                DataFilter::Filter(pkt);
                 SockSender::send(pkt->data(),pkt->size());
             });
             TalusTunInterface::Instance()->AddDispatcher(0,dispatcher);
             TalusTunInterface::Instance()->Up();
             TalusTunInterface::Instance()->Start();
         }else{
+            if(!m_config){
+                return;
+            }
 //            InfoL<<"send to tun:"<<pBuf->size();
             TalusTunInterface::Instance()->Send(pBuf);
         }
@@ -75,7 +84,9 @@ protected:
             return;
         }
         m_ticker.resetTime();
-        SockSender::send("GetTalusTunConfig");
+        auto repBuf = make_shared<BufferLikeString>("GetTalusTunConfig");
+        DataFilter::Filter(repBuf);
+        SockSender::send(repBuf->data(),repBuf->size());
     }
     //数据全部发送完毕后回调
     void onFlush() override{

@@ -8,6 +8,9 @@
 #include "Util/logger.h"
 #include "Http/WebSocketSession.h"
 #include "TunAddrAlloc.h"
+#include "DataFilter.h"
+#include "FakeHeader.h"
+
 
 using namespace std;
 using namespace toolkit;
@@ -25,9 +28,14 @@ public:
         m_ticker.resetTime();
     }
     void onRecv(const Buffer::Ptr &buffer) override {
+        DataFilter::Filter(buffer);
 //        InfoL<<"recv from ws:"<<buffer->size();
         const std::string configCmd = "GetTalusTunConfig";
         if(buffer->size()>=configCmd.length()&& strncmp(configCmd.c_str(),buffer->data(),configCmd.size())==0){
+
+            auto fakeData = BufferRaw::create();
+            SockSender::send(reinterpret_cast<const char *>(FAKE_HEADER), FAKE_HEADER_LEN);
+
             static uint mask = mINI::Instance()[CONFIG_TUN_NET_MASK];
             static uint mtu = mINI::Instance()[CONFIG_TUN_NET_MTU];
 
@@ -42,18 +50,29 @@ public:
             auto dispatcher = TalusTunInterface::Dispatcher::makeDispatcher(addr,32,[this](const toolkit::BufferRaw::Ptr& pkt){
 //                InfoL<<"recv from tun:"<<pkt->size();
 //                InfoL<<"send to ws:"<<pkt->size();
+                if(!m_config){
+                    return;
+                }
+                DataFilter::Filter(pkt);
                 SockSender::send(pkt->data(),pkt->size());
             });
             TalusTunInterface::Instance()->AddDispatcher(0,dispatcher);
-            SockSender::send(response);
+            auto repBuf = make_shared<BufferLikeString>(response);
+            DataFilter::Filter(repBuf);
+            SockSender::send(repBuf->data(),repBuf->size());
         }else{
+            if(!m_config){
+                return;
+            }
 //            InfoL<<"send to tun:"<<buffer->size();
             TalusTunInterface::Instance()->Send(buffer);
         }
     }
     void onError(const SockException &err) override{
         WarnL << err.what();
-        TunAddrAlloc::Instance()->releaseAddr(m_addr);
+        if(m_config){
+            TunAddrAlloc::Instance()->releaseAddr(m_addr);
+        }
     }
     //每隔一段时间触发，用来做超时管理
     void onManager() override{
