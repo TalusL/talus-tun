@@ -1,0 +1,21 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+
+USE_PROCD=1
+NAME=rpcd
+PROG=/usr/share/talusTun/TalusTun
+CONFIG=/usr/share/talusTun/TalusTun.ini
+
+start_service() {
+
+
+        procd_open_instance
+        procd_set_param command "$PROG" ${CONFIG}
+        procd_set_param respawn
+        procd_close_instance
+}
+
+reload_service() {
+        procd_send_signal rpcd
+}
