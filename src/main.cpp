@@ -68,8 +68,8 @@ int main(int argc,char **argv){
         return -1;
     }
 
-//    bool kill_parent_if_failed = true;
-//    System::startDaemon(kill_parent_if_failed);
+    bool kill_parent_if_failed = true;
+    System::startDaemon(kill_parent_if_failed);
 
     loadIniConfig(argv[1]);
 
