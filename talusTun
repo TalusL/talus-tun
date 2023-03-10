@@ -16,6 +16,11 @@ start_service() {
         procd_close_instance
 }
 
+stop_service(){
+  killall TalusTun
+}
+
 reload_service() {
-        killall TalusTun
+  stop_service;
+  start_service;
 }

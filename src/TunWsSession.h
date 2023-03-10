@@ -56,7 +56,8 @@ public:
                 DataFilter::Filter(pkt);
                 SockSender::send(pkt->data(),pkt->size());
             });
-            TalusTunInterface::Instance()->AddDispatcher(0,dispatcher);
+            auto index = stoi(split(addr,".").back());
+            TalusTunInterface::Instance()->AddDispatcher(index,dispatcher);
             auto repBuf = make_shared<BufferLikeString>(response);
             DataFilter::Filter(repBuf);
             SockSender::send(repBuf->data(),repBuf->size());
