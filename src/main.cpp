@@ -4,6 +4,7 @@
 #include <csignal>
 #include <Network/TcpServer.h>
 #include "Http/HttpSession.h"
+#include "System.h"
 
 #include "TunWsClient.h"
 #include "TunWsSession.h"
@@ -24,6 +25,8 @@ struct WsSessionCreator {
 int main(int argc,char **argv){
     Logger::Instance().add(std::make_shared<ConsoleChannel> ());
 
+    bool kill_parent_if_failed = true;
+    System::startDaemon(kill_parent_if_failed);
 
     //设置退出信号处理函数
     static semaphore sem;
