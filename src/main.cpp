@@ -21,9 +21,9 @@ using namespace toolkit;
 
 onceToken tk([](){
 mINI::Instance()[CONFIG_MODE] = 2;
-mINI::Instance()[CONFIG_NAME] = "TalusTun0";
+mINI::Instance()[CONFIG_NAME] = "Talus0";
 mINI::Instance()[CONFIG_WS_LISTEN_IP] = "0.0.0.0";
-mINI::Instance()[CONFIG_WS_LISTEN_PORT] = 8443;
+mINI::Instance()[CONFIG_WS_LISTEN_PORT] = 443;
 mINI::Instance()[CONFIG_TUN_NET_IP] = "10.22.33.1";
 mINI::Instance()[CONFIG_TUN_NET_MASK] = "24";
 mINI::Instance()[CONFIG_TUN_NET_MTU] = 1450;
