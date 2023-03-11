@@ -17,7 +17,7 @@
 using namespace toolkit;
 
 using DataCallback = std::function<void(const toolkit::Buffer::Ptr&)>;
-class TunIO:tuntap::tun{
+class TunIO:public tuntap::tun{
 public:
     explicit TunIO();
     ~TunIO();
@@ -88,10 +88,8 @@ public:
         SockUtil::getDomainIP(addr.c_str(), 0, taddr, AF_INET, SOCK_STREAM, IPPROTO_TCP);
         m_routerRules[((sockaddr_in*)&taddr)->sin_addr.s_addr] = dispatcher;
     }
-    //check if pkt on same subnet
-    bool isOnLinkPkt(const Buffer::Ptr &buf);
     //Dispatch pkt
-    void Dispatch(const toolkit::Buffer::Ptr& pkt);
+    bool Dispatch(const toolkit::Buffer::Ptr& pkt);
 
     void Send(const Buffer::Ptr &ptr) override;
 

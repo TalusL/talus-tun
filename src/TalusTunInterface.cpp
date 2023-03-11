@@ -117,7 +117,7 @@ toolkit::BufferRaw::Ptr TunIO::Receive() {
     return pkt;
 }
 
-void TalusTunInterface::Dispatch(const toolkit::Buffer::Ptr& pkt){
+bool TalusTunInterface::Dispatch(const toolkit::Buffer::Ptr& pkt){
 
     auto getIp = [](uint32_t n){
         std::string ip = StrPrinter
@@ -140,20 +140,17 @@ void TalusTunInterface::Dispatch(const toolkit::Buffer::Ptr& pkt){
             if(router.second->m_cb){
                 router.second->m_cb(pkt);
             }
-            return;
+            return true;
         }
     }
-}
-
-bool TalusTunInterface::isOnLinkPkt(const Buffer::Ptr &buf) {
-    return m_routerRules.find(*((uint32_t*)buf->data()+16) ) != m_routerRules.end();
+    return false;
 }
 
 void TalusTunInterface::Send(const Buffer::Ptr &pkt) {
     m_poller->async([this,pkt]() {
-        if (isOnLinkPkt(pkt)) {
-            Dispatch(pkt);
+        if (Dispatch(pkt)) {
             return;
         }
+        write(pkt->data(),pkt->size());
     });
 }
