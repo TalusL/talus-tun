@@ -3,7 +3,7 @@
 START=99
 
 USE_PROCD=1
-NAME=rpcd
+NAME=TalusTun
 PROG=/usr/share/talusTun/TalusTun
 CONFIG=/usr/share/talusTun/TalusTun.ini
 
