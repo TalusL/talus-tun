@@ -69,7 +69,7 @@ int main(int argc,char **argv){
     }
 
     bool kill_parent_if_failed = true;
-//    System::startDaemon(kill_parent_if_failed);
+    System::startDaemon(kill_parent_if_failed);
 
 
     EventPollerPool::setPoolSize(thread::hardware_concurrency()>10?thread::hardware_concurrency():10);
