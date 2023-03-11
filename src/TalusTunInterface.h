@@ -93,6 +93,8 @@ public:
 
     void Send(const Buffer::Ptr &ptr) override;
 
+    bool isOnLinkPkt(const Buffer::Ptr &buf);
+
 
 private:
     std::mutex m_routerRulesMtx;

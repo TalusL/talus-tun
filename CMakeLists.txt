@@ -14,6 +14,10 @@ include_directories(src)
 
 link_directories(/usr/local/lib)
 
+if(${CMAKE_BUILD_TYPE} MATCHES "Debug" )
+    add_definitions(-DBUILD_DEBUG)
+endif()
+
 file(GLOB_RECURSE SRC_LIST "src/*.cpp" "src/*.c")
 add_executable(${CMAKE_PROJECT_NAME} ${SRC_LIST})
 set(CMAKE_EXE_LINKER_FLAGS "-static")

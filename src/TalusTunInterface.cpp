@@ -128,7 +128,6 @@ bool TalusTunInterface::Dispatch(const toolkit::Buffer::Ptr& pkt){
         return ip;
     };
 
-    std::lock_guard<std::mutex> lck(m_routerRulesMtx);
     uint32_t addr = *((uint32_t*)(pkt->data()+16));
     for (const auto &router: m_routerRules){
         auto mask = ~htonl(router.second->m_mask>=32?0:(0xFFFFFFFF >> router.second->m_mask));
@@ -146,11 +145,16 @@ bool TalusTunInterface::Dispatch(const toolkit::Buffer::Ptr& pkt){
     return false;
 }
 
+bool TalusTunInterface::isOnLinkPkt(const Buffer::Ptr &buf) {
+    return m_routerRules.find(*((uint32_t*)buf->data()+16) ) != m_routerRules.end();
+}
+
 void TalusTunInterface::Send(const Buffer::Ptr &pkt) {
     m_poller->async([this,pkt]() {
-        if (Dispatch(pkt)) {
-            return;
-        }
-        write(pkt->data(),pkt->size());
+//        if (isOnLinkPkt(pkt)) {
+//            Dispatch(pkt);
+//            return;
+//        }
+        TunIO::Send(pkt);
     });
 }
