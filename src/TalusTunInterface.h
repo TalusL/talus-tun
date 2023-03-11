@@ -12,6 +12,7 @@
 #include "Util/util.h"
 #include "Network/sockutil.h"
 #include "Util/logger.h"
+#include <Poller/EventPoller.h>
 
 using namespace toolkit;
 
@@ -25,7 +26,7 @@ public:
     void SetMTU(uint mtu);
     void Up();
     void Down();
-    void Send(const toolkit::Buffer::Ptr&);
+    virtual void Send(const toolkit::Buffer::Ptr&);
     toolkit::BufferRaw::Ptr Receive();
 
 private:
@@ -33,6 +34,7 @@ private:
     std::string m_ipv4;
     uint m_netmask = 24;
     uint m_mtu = 1420;
+
 };
 
 class TalusTunInterface :public TunIO {
@@ -69,6 +71,7 @@ public:
 
 
     void Config(const TalusTunCfg& cfg);
+
     ~TalusTunInterface();
     //Listen on interface
     bool Start();
@@ -80,13 +83,18 @@ public:
         return &talusTunInterface;
     }
     //AddDispatcher
-    void AddDispatcher(uint index, const Dispatcher::Ptr& dispatcher){
-        m_routerRules[index] = dispatcher;
+    void AddDispatcher(const std::string& addr, const Dispatcher::Ptr& dispatcher){
+        sockaddr_storage taddr;
+        SockUtil::getDomainIP(addr.c_str(), 0, taddr, AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        m_routerRules[((sockaddr_in*)&taddr)->sin_addr.s_addr] = dispatcher;
     }
     //check if pkt on same subnet
-    static bool isOnLinkPkt(const Buffer::Ptr &buf);
+    bool isOnLinkPkt(const Buffer::Ptr &buf);
     //Dispatch pkt
     void Dispatch(const toolkit::Buffer::Ptr& pkt);
+
+    void Send(const Buffer::Ptr &ptr) override;
+
 
 private:
     std::mutex m_routerRulesMtx;
@@ -95,6 +103,8 @@ private:
     std::thread m_listenThread;
     //running flag
     volatile bool m_running = false;
+    //poller
+    EventPoller::Ptr m_poller = EventPollerPool::Instance().getPoller();
 };
 
 

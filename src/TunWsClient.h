@@ -44,8 +44,10 @@ protected:
                 if(!m_config){
                     return;
                 }
-                DataFilter::Filter(pkt);
-                SockSender::send(pkt->data(),pkt->size());
+                getPoller()->async([this,pkt](){
+                    DataFilter::Filter(pkt);
+                    SockSender::send(pkt->data(),pkt->size());
+                });
             });
             TalusTunInterface::Instance()->AddDispatcher(0,dispatcher);
             TalusTunInterface::Instance()->Up();

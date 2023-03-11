@@ -53,20 +53,17 @@ public:
                 if(!m_config){
                     return;
                 }
-                DataFilter::Filter(pkt);
-                SockSender::send(pkt->data(),pkt->size());
+                getPoller()->async([pkt,this](){
+                    DataFilter::Filter(pkt);
+                    SockSender::send(pkt->data(),pkt->size());
+                });
             });
-            auto index = stoi(split(addr,".").back());
-            TalusTunInterface::Instance()->AddDispatcher(index,dispatcher);
+            TalusTunInterface::Instance()->AddDispatcher(addr,dispatcher);
             auto repBuf = make_shared<BufferLikeString>(response);
             DataFilter::Filter(repBuf);
             SockSender::send(repBuf->data(),repBuf->size());
         }else{
             if(!m_config){
-                return;
-            }
-            if(TalusTunInterface::isOnLinkPkt(buffer)){
-                TalusTunInterface::Instance()->Dispatch(buffer);
                 return;
             }
 //            InfoL<<"send to tun:"<<buffer->size();

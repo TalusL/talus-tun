@@ -71,6 +71,9 @@ int main(int argc,char **argv){
     bool kill_parent_if_failed = true;
     System::startDaemon(kill_parent_if_failed);
 
+
+    EventPollerPool::setPoolSize(thread::hardware_concurrency()>10?thread::hardware_concurrency():10);
+
     loadIniConfig(argv[1]);
 
     int mode = mINI::Instance()[CONFIG_MODE];

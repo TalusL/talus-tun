@@ -29,7 +29,9 @@ bool TalusTunInterface::Start() {
         while (m_running){
             auto pkt = Receive();
             if(pkt&&pkt->size()){
-                Dispatch(pkt);
+                m_poller->async([this,pkt](){
+                    Dispatch(pkt);
+                });
             }
         }
     });
@@ -89,8 +91,8 @@ void TunIO::Up() {
 }
 
 
-void TunIO::Send(const toolkit::Buffer::Ptr& data) {
-    write(data->data(),data->size());
+void TunIO::Send(const toolkit::Buffer::Ptr& pkt) {
+    write(pkt->data(),pkt->size());
 }
 
 TunIO::~TunIO() {
@@ -144,14 +146,14 @@ void TalusTunInterface::Dispatch(const toolkit::Buffer::Ptr& pkt){
 }
 
 bool TalusTunInterface::isOnLinkPkt(const Buffer::Ptr &buf) {
-    static std::string tunNetIp = mINI::Instance()[CONFIG_TUN_NET_IP];
-    static int tunNetMask = mINI::Instance()[CONFIG_TUN_NET_MASK];
-    static uint32_t local_addr = 0;
-    static auto mask = ~htonl(tunNetMask >= 32 ? 0 : (0xFFFFFFFF >> tunNetMask));
-    if (!local_addr) {
-        sockaddr_storage taddr;
-        SockUtil::getDomainIP(tunNetIp.c_str(), 0, taddr, AF_INET, SOCK_STREAM, IPPROTO_TCP);
-        local_addr = ((sockaddr_in *) &taddr)->sin_addr.s_addr;
-    }
-    return (*((uint32_t*)buf->data()+16) & mask) == (local_addr && mask);
+    return m_routerRules.find(*((uint32_t*)buf->data()+16) ) != m_routerRules.end();
+}
+
+void TalusTunInterface::Send(const Buffer::Ptr &pkt) {
+    m_poller->async([this,pkt]() {
+        if (isOnLinkPkt(pkt)) {
+            Dispatch(pkt);
+            return;
+        }
+    });
 }
