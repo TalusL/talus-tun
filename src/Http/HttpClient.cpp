@@ -55,7 +55,7 @@ void HttpClient::sendRequest(const string &url) {
     auto host_header = host;
     splitUrl(host, host, port);
     _header.emplace("Host", host_header);
-    _header.emplace("User-Agent", "Nginx");
+    _header.emplace("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36");
     _header.emplace("Connection", "keep-alive");
     _header.emplace("Accept", "*/*");
     _header.emplace("Accept-Language", "zh-CN,zh;q=0.8");
