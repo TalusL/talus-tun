@@ -49,7 +49,7 @@ protected:
                     SockSender::send(pkt->data(),pkt->size());
                 });
             });
-            TalusTunInterface::Instance()->AddDispatcher(0,dispatcher);
+            TalusTunInterface::Instance()->AddDispatcher("0.0.0.0",dispatcher);
             TalusTunInterface::Instance()->Up();
             TalusTunInterface::Instance()->Start();
         }else{
