@@ -7,7 +7,7 @@ Type=simple
 WorkingDirectory=/usr/share/talusTun
 User=root
 Group=root
-ExecStart=/bin/bash -c "iptables -A FORWARD -i eth0 -o Talus0 -j ACCEPT && iptables -A FORWARD -i Talus0 -j ACCEPT && iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE && /usr/share/talusTun/TalusTun /usr/share/talusTun/TalusTun.ini "
+ExecStart=/bin/bash -c "echo 1 > /proc/sys/net/ipv4/ip_forward && iptables -A FORWARD -i eth0 -o Talus0 -j ACCEPT && iptables -A FORWARD -i Talus0 -j ACCEPT && iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE && /usr/share/talusTun/TalusTun /usr/share/talusTun/TalusTun.ini "
 ExecStop=/bin/bash -c "/bin/kill -s SIGINT \$MAINPID && iptables -D FORWARD -i eth0 -o Talus0 -j ACCEPT && iptables -D FORWARD -i Talus0 -j ACCEPT"
 
 [Install]
