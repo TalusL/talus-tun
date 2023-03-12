@@ -33,6 +33,8 @@ mINI::Instance()[CONFIG_ADDR_ALLOC_BEGIN] = 100;
 mINI::Instance()[CONFIG_ADDR_ALLOC_END] = 200;
 mINI::Instance()[CONFIG_ENABLE_SSL] = false;
 mINI::Instance()[CONFIG_PASS] = "TalusTun0123456789";
+mINI::Instance()[CONFIG_UP_SCRIPT] = "";
+mINI::Instance()[CONFIG_DOWN_SCRIPT] = "";
 });
 
 struct WsSessionCreator {

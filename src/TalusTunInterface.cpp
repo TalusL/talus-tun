@@ -9,6 +9,7 @@
 #include <linux/if_tun.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
+#include "Process.h"
 
 
 TalusTunInterface::~TalusTunInterface() {
@@ -88,6 +89,12 @@ void TunIO::SetMTU(uint mtu) {
 void TunIO::Up() {
     ip(m_ipv4,m_netmask);
     this->up();
+    std::string upScript = mINI::Instance()[CONFIG_UP_SCRIPT];
+    if(!upScript.empty()){
+        Process process;
+        std::string log;
+        process.run(upScript,log);
+    }
 }
 
 
@@ -104,6 +111,12 @@ void TunIO::SetIPv4Netmask(uint netmask) {
 
 void TunIO::Down() {
     this->down();
+    std::string downScript = mINI::Instance()[CONFIG_DOWN_SCRIPT];
+    if(!downScript.empty()){
+        Process process;
+        std::string log;
+        process.run(downScript,log);
+    }
 }
 
 toolkit::BufferRaw::Ptr TunIO::Receive() {

@@ -10,6 +10,8 @@
 #define CONFIG_MODE TUN_CONFIG"mode"
 #define CONFIG_NAME TUN_CONFIG"name"
 #define CONFIG_PASS TUN_CONFIG"pass"
+#define CONFIG_UP_SCRIPT TUN_CONFIG"upScript"
+#define CONFIG_DOWN_SCRIPT TUN_CONFIG"downScript"
 
 
 #define SERVER_CONFIG "talusTunServer."
