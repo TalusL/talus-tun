@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include "Process.h"
+#include "Thread/WorkThreadPool.h"
 
 
 TalusTunInterface::~TalusTunInterface() {
@@ -91,9 +92,13 @@ void TunIO::Up() {
     this->up();
     std::string upScript = mINI::Instance()[CONFIG_UP_SCRIPT];
     if(!upScript.empty()){
-        Process process;
-        std::string log;
-        process.run(upScript,log);
+        WorkThreadPool::Instance().getPoller()->async([upScript](){
+            Process process;
+            std::string log;
+            InfoL<<"run cmd:"<<upScript;
+            process.run(upScript,log);
+            process.wait();
+        });
     }
 }
 
@@ -113,9 +118,13 @@ void TunIO::Down() {
     this->down();
     std::string downScript = mINI::Instance()[CONFIG_DOWN_SCRIPT];
     if(!downScript.empty()){
-        Process process;
-        std::string log;
-        process.run(downScript,log);
+        WorkThreadPool::Instance().getPoller()->async([downScript](){
+            Process process;
+            std::string log;
+            InfoL<<"run cmd:"<<downScript;
+            process.run(downScript,log);
+            process.wait();
+        });
     }
 }
 
