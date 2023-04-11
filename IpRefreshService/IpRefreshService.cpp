@@ -6,7 +6,7 @@
 #include <Util/NoticeCenter.h>
 #include "Http/config.h"
 #include "System.h"
-#include "Process.h"
+#include "Util/base64.h"
 
 using namespace toolkit;
 using namespace mediakit;
@@ -38,7 +38,9 @@ int  main(int argc,char **argv){
     TcpServer::Ptr httpSrv(new TcpServer());
     httpSrv->start<HttpSession>(httpPort,"0.0.0.0");
 
-    NoticeCenter::Instance().addListener(nullptr,Broadcast::kBroadcastHttpRequest,[](BroadcastHttpRequestArgs){
+    std::map<std::string,std::string> ipMap;
+    std::mutex mtx;
+    NoticeCenter::Instance().addListener(nullptr,Broadcast::kBroadcastHttpRequest,[&](BroadcastHttpRequestArgs){
         if (parser.Url()=="/index/api/keepalive"){
             consumed = true;
             auto ip = sender.get_peer_ip();
@@ -47,17 +49,21 @@ int  main(int argc,char **argv){
                 invoker(400,{},"");
                 return ;
             }
-            invoker(200,{},"");
-            WorkThreadPool::Instance().getPoller()->async([ip,id](){
-                auto cmd = mINI::Instance()[UPDATE_IP_CMD];
-                std::string path;
-                replace(cmd,"$REMOTE_IP$",ip);
-                replace(cmd,"$ID$",id);
-                InfoL<<"run cmd:"<<cmd;
-                Process process;
-                process.run(cmd,path);
-                process.wait();
-            });
+            std::lock_guard<std::mutex> lck(mtx);
+            ipMap[id] = ip;
+            invoker(200,{},ip);
+        }
+    });
+    NoticeCenter::Instance().addListener(nullptr,Broadcast::kBroadcastHttpRequest,[&](BroadcastHttpRequestArgs){
+        if (parser.Url()=="/index/api/getaddr"){
+            consumed = true;
+            auto id = parser.getUrlArgs()["id"];
+            if(id.empty()){
+                invoker(400,{},"");
+                return ;
+            }
+            std::lock_guard<std::mutex> lck(mtx);
+            invoker(200,{},encodeBase64(ipMap[id]));
         }
     });
 
